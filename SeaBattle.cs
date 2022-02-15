@@ -63,13 +63,21 @@ namespace sea_battle
             FieldRenderer.Show(myField, "Your field");
             Console.ReadKey(false);
 
-            while (!CheckShips(myField) && !CheckShips(enemyField))
+            while (true)
             {
                 FieldRenderer.Show(enemyVisibleField, "Enemy field");
                 Console.WriteLine("Press any key to continue...",false);
                 Console.ReadKey(false);
                 PlayerAttack();
+                if (CheckShips(enemyField))
+                {
+                    break;
+                }
                 ComputerAttack();
+                if (CheckShips(myField))
+                {
+                    break;
+                }
             }
 
             System.Environment.Exit(1);
