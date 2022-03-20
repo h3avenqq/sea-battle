@@ -39,68 +39,57 @@ namespace sea_battle
                                 break;
 
                             case ConsoleKey.RightArrow:
-                                if (CheckCoordinates((ship[0].x, ship[0].y + 1)) && CheckCoordinates((ship[ship.Count - 1].x, ship[ship.Count - 1].y + 1)))
-                                {
-                                    for (int i = 0; i < ship.Count; i++)
-                                    {
-                                        ship[i] = (ship[i].x, ship[i].y + 1);
-                                    }
-                                }
+                                MoveShip(ship, (0,1));                               
                                 break;
 
                             case ConsoleKey.LeftArrow:
-                                if (CheckCoordinates((ship[0].x, ship[0].y - 1)) && CheckCoordinates((ship[ship.Count - 1].x, ship[ship.Count - 1].y - 1)))
-                                {
-                                    for (int i = 0; i < ship.Count; i++)
-                                    {
-                                        ship[i] = (ship[i].x, ship[i].y - 1);
-                                    }
-                                }
+                                MoveShip(ship, (0,-1));                               
                                 break;
 
                             case ConsoleKey.UpArrow:
-                                if (CheckCoordinates((ship[0].x - 1, ship[0].y)) && CheckCoordinates((ship[ship.Count - 1].x - 1, ship[ship.Count - 1].y)))
-                                {
-                                    for (int i = 0; i < ship.Count; i++)
-                                    {
-                                        ship[i] = (ship[i].x - 1, ship[i].y);
-                                    }
-                                }
+                                MoveShip(ship, (-1, 0));                               
                                 break;
 
                             case ConsoleKey.DownArrow:
-                                if (CheckCoordinates((ship[0].x + 1, ship[0].y)) && CheckCoordinates((ship[ship.Count - 1].x + 1, ship[ship.Count - 1].y)))
-                                {
-                                    for (int i = 0; i < ship.Count; i++)
-                                    {
-                                        ship[i] = (ship[i].x + 1, ship[i].y);
-                                    }
-                                }
+                                MoveShip(ship, (1, 0));                                
                                 break;
                             case ConsoleKey.R:
+                                //По сути, это транспонирование, не могу придумать навскидку, как проще сделать))
                                 bool position = ship[0].y == ship[ship.Count - 1].y;
                                 for (int i = 1; i < ship.Count; i++)
                                 {
-
+                                    (int x, int y) transpon = (i, i);
                                     if (position && CheckCoordinates((ship[ship.Count - 1].x - ship.Count + 1, ship[ship.Count - 1].y + ship.Count - 1)))
-                                    {
-                                        ship[i] = (ship[i].x - i, ship[i].y + i);
+                                    {                                       
+                                        transpon = (-i, i);
                                     }
                                     else if (!position && CheckCoordinates((ship[ship.Count - 1].x + ship.Count - 1, ship[ship.Count - 1].y - ship.Count + 1)))
-                                    {
-                                        ship[i] = (ship[i].x + i, ship[i].y - i);
+                                    {                                        
+                                        transpon = (i, -i);
                                     }
+                                    ship[i] = (ship[i].x + transpon.x, ship[i].y + transpon.y);
+                                    //Не могу сказать, что стало прямо так уж лучше, скорее, просто мое видение
                                 }
                                 break;
                         }
-
                         FieldRenderer.Show(ship, myField, "testing...");
                     }
-                }
-                
-            }
-            
+                }                
+            }            
         }
+
+        public static void MoveShip(List<(int x, int y)> movingShip, (int dX, int dY) direction)
+        {
+            if (CheckCoordinates((movingShip[0].x+ direction.dX, movingShip[0].y + direction.dY)) && 
+                CheckCoordinates((movingShip[movingShip.Count - 1].x+ direction.dX, movingShip[movingShip.Count - 1].y + direction.dY)))
+            {
+                for (int i = 0; i < movingShip.Count; i++)
+                {
+                    movingShip[i] = (movingShip[i].x+ direction.dX, movingShip[i].y + direction.dY);
+                }
+            }
+        }
+        
 
         public static void EnemyFieldGenerator(ref string[,] enemyField)
         {
