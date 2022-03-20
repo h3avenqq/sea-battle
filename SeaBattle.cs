@@ -9,10 +9,17 @@ namespace sea_battle
     {
         private static string[,] myField = new string[10, 10];
         private static string[,] enemyField = new string[10, 10];
+        //Честно говоря, не вижу особого смысла делать под видимое поле - кмк, можно просто маску наложить
+        //при рендере на оригинальное поле. Так будет оптимальнее. Но не могу сказать, что в данном случае мое решение лучше
         private static string[,] enemyVisibleField = new string[10, 10];
 
         static SeaBattle()
         {
+            /*Классы, интерфейсы, делегаты и массивы (включая списки, насчет стеков и очередей не уверен, не проверял)
+             * в шарпе являются ссылочными, то есть при передаче в качестве аргумента вы уже передаете ссылку на массив. 
+             * Тут можно много копий ломать по поводу формальных определений, но
+             * на практике ref ставить необязательно и, бегло посмотрев шарповский код на сайте майков, я не нашел, чтобы они
+             * ставили ref при передаче массивов*/
             FillEmpties(ref myField);
             FillEmpties(ref enemyField);
             FillEmpties(ref enemyVisibleField);
@@ -37,6 +44,8 @@ namespace sea_battle
                         break;
                     case ConsoleKey.C:
                         Console.Clear();
+                        //Я бы то, что надо выводить, вынес в отдельную строковую переменную, а тут бы только
+                        //Console.WriteLine(s) делал
                         Console.WriteLine("Управление расстановкой кораблей:");
                         Console.WriteLine("\t↑ - Вверх");
                         Console.WriteLine("\t↓ - Вниз");
@@ -54,21 +63,31 @@ namespace sea_battle
                 Console.Clear();
             }
         }
-
         private static void Gameplay()
-        {
+        {            
             ShipGenerator.EnemyFieldGenerator(ref enemyField);
             ShipGenerator.MyFieldGenerator(ref myField);
-
             FieldRenderer.Show(myField, "Your field");
             Console.ReadKey(false);
 
             while (true)
             {
+                //В идеале лучше вообще WriteLine отсюда убрать. Слой логики не должен лазить в слой представления,
+                //потому что при переносе на другое представление эти куски придется переписывать.
+                //ReadKey'и все тоже желательно выносить отдельно. То есть, вся эта логика - это слой Model. 
+                //Он получает на вход аргументы, выводит на выход, но не занимается той же считкой клавиш и выводом на экран.
+                //Это уже слой представления. Для их общения самый базовый способ - это делать промежуточный слой контроллера,
+                //который берет сигналы с представления, вызывает слой модели и передает ему аргументы и, соответственно, в обратную сторону.
+                //Для шарпа, например, часто используют MVP. Это я больше на будущее))
+                //По сути, геймплей у вас и выполняет роль контроллера. Поэтому, когда вы вызываете FieldRenderer.Show - это правильно.
+                //Когда writeline идет напрямую - уже хуже. Аналогично, правильней вызывать метод ЧекайЧтоНажал, который будет
+                //сюда возвращать результаты нажатия
                 FieldRenderer.Show(enemyVisibleField, "Enemy field");
                 Console.WriteLine("Press any key to continue...",false);
+                //Не очень удобно, когда он поля по очереди показывает - когда свое поле и видимое поле врага отображаются одновременно, то 
+                //намного удобнее
                 Console.ReadKey(false);
-                PlayerAttack();
+                PlayerAttack();                
                 if (CheckShips(enemyField))
                 {
                     break;
@@ -159,7 +178,8 @@ namespace sea_battle
                 {
                     myField[i, j] = "-";
                 }
-                Console.WriteLine();
+                //Какой смысл тут райтлайн делать? Мы же тут заполняем массив, а не выводим)
+                //Console.WriteLine();
             }
         }
     }
